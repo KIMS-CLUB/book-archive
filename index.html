@@ -3,62 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Archive Pro</title>
-    
+    <title>JIEUN's Book Archive</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#4f46e5">
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('sw.js')
-            .then(reg => console.log('Service Worker Registered!', reg))
-            .catch(err => console.log('Service Worker Error', err));
-        });
-      }
-    </script>
-
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --primary: #4f46e5; --bg: #f3f4f6; --card: #ffffff;
-            --text-main: #1f2937; --text-sub: #6b7280; --border: #d1d5db;
+            --primary: #6366f1; --bg: #f8fafc; --card: #ffffff;
+            --text-main: #0f172a; --text-sub: #64748b; --border: #e2e8f0;
         }
         [data-theme='dark'] {
-            --bg: #111827; --card: #1f2937; --text-main: #f9fafb;
-            --text-sub: #9ca3af; --border: #374151;
+            --bg: #0f172a; --card: #1e293b; --text-main: #f8fafc;
+            --text-sub: #94a3b8; --border: #334155;
         }
         body { font-family: 'Pretendard', sans-serif; background: var(--bg); color: var(--text-main); margin: 0; padding: 20px; transition: 0.3s; }
-        .container { max-width: 600px; margin: 0 auto; }
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .card { background: var(--card); padding: 20px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid var(--border); }
+        .container { max-width: 1000px; margin: 0 auto; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        
+        /* 대시보드 스타일 */
+        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: var(--card); padding: 20px; border-radius: 16px; border: 1px solid var(--border); text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .stat-card h3 { font-size: 0.8rem; color: var(--text-sub); margin: 0; }
+        .stat-card p { font-size: 1.8rem; font-weight: 800; margin: 10px 0 0; color: var(--primary); }
+        .chart-container { background: var(--card); padding: 20px; border-radius: 16px; border: 1px solid var(--border); grid-column: span 2; min-height: 250px; }
+
+        /* 입력 및 목록 섹션 */
+        .layout-grid { display: grid; grid-template-columns: 350px 1fr; gap: 25px; }
+        @media (max-width: 800px) { .layout-grid { grid-template-columns: 1fr; } }
+
+        .input-card { background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid var(--border); height: fit-content; position: sticky; top: 20px; }
+        input, select, textarea { width: 100%; padding: 12px; margin-top: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text-main); box-sizing: border-box; font-size: 0.9rem; }
+        button { width: 100%; padding: 14px; margin-top: 20px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; background: var(--primary); color: white; font-size: 1rem; }
+        
+        .book-list { display: grid; gap: 15px; }
+        .book-item { background: var(--card); padding: 20px; border-radius: 16px; border: 1px solid var(--border); position: relative; transition: 0.2s; }
+        .book-item:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .badge { font-size: 0.7rem; padding: 4px 8px; border-radius: 6px; font-weight: 600; margin-bottom: 8px; display: inline-block; background: var(--bg); border: 1px solid var(--border); }
+        .delete-btn { position: absolute; top: 20px; right: 20px; cursor: pointer; color: var(--text-sub); background: none; border: none; font-size: 1.2rem; }
         .hidden { display: none; }
-        input, select, textarea { width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text-main); box-sizing: border-box; }
-        button { width: 100%; padding: 12px; margin-top: 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; background: var(--primary); color: white; transition: 0.2s; }
-        button:active { transform: scale(0.98); }
-        .book-item { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border); position: relative; }
-        .delete-btn { position: absolute; top: 12px; right: 12px; background: none; color: var(--text-sub); width: auto; padding: 0; margin: 0; font-size: 1.2rem; }
-        .status-badge { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-bottom: 5px; display: inline-block; background: #e5e7eb; color: #374151; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>📚 서재</h1>
-        <button id="themeBtn" onclick="toggleTheme()" style="width: auto; margin: 0; padding: 5px 12px; font-size: 0.8rem; background: var(--card); color: var(--text-main); border: 1px solid var(--border);">🌙 다크모드</button>
+        <h1 style="font-size: 1.5rem; display: flex; align-items: center; gap: 10px;">📚 지은님의 데이터 서재</h1>
+        <button id="themeBtn" onclick="toggleTheme()" style="width: auto; margin: 0; padding: 8px 16px; background: var(--card); color: var(--text-main); border: 1px solid var(--border);">🌙 다크모드</button>
     </header>
 
-    <div id="loginSection" class="card" style="text-align: center; padding: 40px 20px;">
-        <h2 style="margin-top:0;">환영합니다!</h2>
-        <p style="color: var(--text-sub);">나만의 독서 기록을 클라우드에 안전하게 저장하세요.</p>
-        <button onclick="login()" style="background: #4285F4;">Google 계정으로 시작하기</button>
+    <div id="loginSection" class="stat-card" style="padding: 60px 20px;">
+        <h2>독서 여정을 시작해볼까요?</h2>
+        <p style="color: var(--text-sub); margin-bottom: 30px;">기록은 휘발되지만 데이터는 남습니다.</p>
+        <button onclick="login()" style="max-width: 300px; margin: 0 auto;">Google로 간편 로그인</button>
     </div>
 
     <div id="appContents" class="hidden">
-        <div class="card">
-            <input type="text" id="title" placeholder="어떤 책을 읽으셨나요?">
-            <input type="text" id="author" placeholder="저자는 누구인가요?">
-            <div style="display: flex; gap: 10px;">
+        <div class="dashboard">
+            <div class="stat-card">
+                <h3>전체 독서량</h3>
+                <p id="totalCount">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>완독 성공</h3>
+                <p id="doneCount" style="color: #10b981;">0</p>
+            </div>
+            <div class="chart-container">
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+
+        <div class="layout-grid">
+            <aside class="input-card">
+                <h3 style="margin-top: 0;">새로운 기록</h3>
+                <input type="text" id="title" placeholder="책 제목">
+                <input type="text" id="author" placeholder="저자">
                 <select id="category">
                     <option value="경제/경영">경제/경영</option>
                     <option value="IT/데이터">IT/데이터</option>
@@ -69,13 +86,17 @@
                     <option value="reading">📖 읽는 중</option>
                     <option value="done">✅ 완독</option>
                 </select>
-            </div>
-            <textarea id="review" rows="2" placeholder="기억하고 싶은 한 줄 평을 남겨보세요."></textarea>
-            <button onclick="addBook()">내 서재에 저장</button>
-            <button onclick="logout()" style="background: none; color: var(--text-sub); margin-top: 10px; font-size: 0.8rem; text-decoration: underline;">로그아웃</button>
-        </div>
+                <textarea id="review" rows="3" placeholder="기억하고 싶은 문장을 적어보세요."></textarea>
+                <button onclick="addBook()">서재에 추가하기</button>
+                <button onclick="logout()" style="background: none; color: var(--text-sub); font-size: 0.8rem; text-decoration: underline;">로그아웃</button>
+            </aside>
 
-        <div id="bookGrid"></div>
+            <main>
+                <h3 id="listTitle">전체 도서 목록 (0)</h3>
+                <div id="bookGrid" class="book-list">
+                    </div>
+            </main>
+        </div>
     </div>
 </div>
 
@@ -84,7 +105,7 @@
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, collection, addDoc, query, where, onSnapshot, deleteDoc, doc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // 지은님의 Firebase 설정값
+    // 지은님의 Firebase 설정 (스크린샷 기반)
     const firebaseConfig = {
         apiKey: "AIzaSyBosa3su7U1VkjezE9tAFdymfd3J3Xaqcc",
         authDomain: "book-archive-48b1b.firebaseapp.com",
@@ -99,17 +120,14 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
     const provider = new GoogleAuthProvider();
-
-    let currentUser = null;
+    let myChart = null;
 
     onAuthStateChanged(auth, (user) => {
         if (user) {
-            currentUser = user;
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('appContents').classList.remove('hidden');
             loadBooks(user.uid);
         } else {
-            currentUser = null;
             document.getElementById('loginSection').classList.remove('hidden');
             document.getElementById('appContents').classList.add('hidden');
         }
@@ -124,41 +142,63 @@
         if (!title || !author) return alert('제목과 저자를 입력해주세요!');
 
         await addDoc(collection(db, "books"), {
-            uid: currentUser.uid,
+            uid: auth.currentUser.uid,
             title, author,
             category: document.getElementById('category').value,
             status: document.getElementById('status').value,
             review: document.getElementById('review').value,
             createdAt: new Date()
         });
-        document.getElementById('title').value = '';
-        document.getElementById('author').value = '';
-        document.getElementById('review').value = '';
+        ['title', 'author', 'review'].forEach(id => document.getElementById(id).value = '');
     };
 
     function loadBooks(uid) {
         const q = query(collection(db, "books"), where("uid", "==", uid), orderBy("createdAt", "desc"));
         onSnapshot(q, (snapshot) => {
-            const grid = document.getElementById('bookGrid');
-            grid.innerHTML = snapshot.docs.map(d => {
-                const b = d.data();
-                return `
-                    <div class="book-item">
-                        <span class="status-badge">${b.status === 'done' ? '✅ 완독' : '📖 읽는 중'}</span>
-                        <div style="font-weight:bold; font-size:1.1rem;">${b.title}</div>
-                        <div style="font-size:0.85rem; color:var(--text-sub); margin-bottom:8px;">${b.author} | ${b.category}</div>
-                        <div style="font-size:0.95rem; line-height:1.4;">${b.review}</div>
-                        <button class="delete-btn" onclick="deleteBook('${d.id}')">✕</button>
-                    </div>
-                `;
-            }).join('');
-        }, (error) => {
-            console.error("색인이 필요할 수 있습니다. 콘솔 링크를 확인하세요:", error);
+            const books = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+            renderDashboard(books);
+            renderList(books);
+        }, (err) => {
+            console.error("Index error: ", err);
+            // 여기서 콘솔창의 색인 생성 링크를 꼭 클릭해야 목록이 나타납니다!
         });
     }
 
+    function renderDashboard(books) {
+        document.getElementById('totalCount').innerText = books.length;
+        document.getElementById('doneCount').innerText = books.filter(b => b.status === 'done').length;
+        document.getElementById('listTitle').innerText = `전체 도서 목록 (${books.length})`;
+
+        const cats = {};
+        books.forEach(b => cats[b.category] = (cats[b.category] || 0) + 1);
+
+        const ctx = document.getElementById('categoryChart').getContext('2d');
+        if (myChart) myChart.destroy();
+        myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(cats),
+                datasets: [{ label: '카테고리별 통계', data: Object.values(cats), backgroundColor: '#6366f1' }]
+            },
+            options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+    }
+
+    function renderList(books) {
+        const grid = document.getElementById('bookGrid');
+        grid.innerHTML = books.map(b => `
+            <div class="book-item">
+                <span class="badge">${b.status === 'done' ? '✅ 완독' : '📖 읽는 중'}</span>
+                <div style="font-weight:bold; font-size:1.1rem;">${b.title}</div>
+                <div style="font-size:0.85rem; color:var(--text-sub);">${b.author} | ${b.category}</div>
+                <p style="font-size:0.9rem; line-height:1.5; margin-top:10px;">${b.review}</p>
+                <button class="delete-btn" onclick="deleteBook('${b.id}')">✕</button>
+            </div>
+        `).join('');
+    }
+
     window.deleteBook = async (id) => {
-        if (confirm('이 기록을 삭제할까요?')) await deleteDoc(doc(db, "books", id));
+        if (confirm('삭제할까요?')) await deleteDoc(doc(db, "books", id));
     };
 </script>
 
@@ -169,6 +209,5 @@
         document.getElementById('themeBtn').innerText = theme === 'dark' ? '☀️ 라이트모드' : '🌙 다크모드';
     }
 </script>
-
 </body>
 </html>
