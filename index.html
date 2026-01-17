@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Archive Pro</title>
+    <link rel="manifest" href="manifest.json">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #4f46e5; --bg: #f3f4f6; --card: #ffffff;
+            --text-main: #1f2937; --text-sub: #6b7280; --border: #d1d5db;
+        }
+        [data-theme='dark'] {
+            --bg: #111827; --card: #1f2937; --text-main: #f9fafb;
+            --text-sub: #9ca3af; --border: #374151;
+        }
+        body { font-family: 'Pretendard', sans-serif; background: var(--bg); color: var(--text-main); margin: 0; padding: 20px; transition: 0.3s; }
+        .container { max-width: 800px; margin: 0 auto; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .card { background: var(--card); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid var(--border); }
+        .hidden { display: none; }
+        input, select, textarea { width: 100%; padding: 10px; margin-top: 8px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text-main); box-sizing: border-box; }
+        button { width: 100%; padding: 12px; margin-top: 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; background: var(--primary); color: white; }
+        .book-item { background: var(--card); padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid var(--border); position: relative; }
+        .delete-btn { position: absolute; top: 10px; right: 10px; background: none; color: var(--text-sub); width: auto; padding: 0; margin: 0; font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>📚 Book Archive</h1>
+        <button id="themeBtn" onclick="toggleTheme()" style="width: auto; margin: 0; padding: 5px 10px; font-size: 0.8rem;">🌙 다크모드</button>
+    </header>
+
+    <div id="loginSection" class="card" style="text-align: center;">
+        <p>나만의 서재를 관리하려면 로그인하세요.</p>
+        <button onclick="login()">Google로 시작하기</button>
+    </div>
+
+    <div id="appContents" class="hidden">
+        <div class="card">
+            <input type="text" id="title" placeholder="책 제목">
+            <input type="text" id="author" placeholder="저자">
+            <select id="category">
+                <option value="경제/경영">경제/경영</option>
+                <option value="IT/데이터">IT/데이터</option>
+                <option value="자기계발">자기계발</option>
+                <option value="소설/에세이">소설/에세이</option>
+            </select>
+            <select id="status">
+                <option value="reading">📖 읽는 중</option>
+                <option value="done">✅ 완독</option>
+            </select>
+            <textarea id="review" rows="2" placeholder="한 줄 평"></textarea>
+            <button onclick="addBook()">저장하기</button>
+            <button onclick="logout()" style="background: #6b7280; margin-top: 5px;">로그아웃</button>
+        </div>
+
+        <div id="bookGrid"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, query, where, onSnapshot, deleteDoc, doc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // 사용자 스크린샷의 설정값 적용
+    const firebaseConfig = {
+        apiKey: "AIzaSyBosa3su7U1VkjezE9tAFdymfd3J3Xaqcc",
+        authDomain: "book-archive-48b1b.firebaseapp.com",
+        projectId: "book-archive-48b1b",
+        storageBucket: "book-archive-48b1b.firebasestorage.app",
+        messagingSenderId: "761834872230",
+        appId: "1:761834872230:web:f4927924a2412948da4367",
+        measurementId: "G-QHXR3XK30K"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    let currentUser = null;
+
+    // 로그인 상태 감시
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            currentUser = user;
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('appContents').classList.remove('hidden');
+            loadBooks(user.uid);
+        } else {
+            currentUser = null;
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('appContents').classList.add('hidden');
+        }
+    });
+
+    window.login = () => signInWithPopup(auth, provider);
+    window.logout = () => signOut(auth);
+
+    // 데이터 저장
+    window.addBook = async () => {
+        const title = document.getElementById('title').value;
+        const author = document.getElementById('author').value;
+        if (!title || !author) return alert('제목과 저자를 입력하세요!');
+
+        await addDoc(collection(db, "books"), {
+            uid: currentUser.uid,
+            title, author,
+            category: document.getElementById('category').value,
+            status: document.getElementById('status').value,
+            review: document.getElementById('review').value,
+            createdAt: new Date()
+        });
+        document.getElementById('title').value = '';
+        document.getElementById('author').value = '';
+    };
+
+    // 데이터 불러오기
+    function loadBooks(uid) {
+        const q = query(collection(db, "books"), where("uid", "==", uid), orderBy("createdAt", "desc"));
+        onSnapshot(q, (snapshot) => {
+            const grid = document.getElementById('bookGrid');
+            grid.innerHTML = snapshot.docs.map(d => {
+                const b = d.data();
+                return `
+                    <div class="book-item">
+                        <div style="font-weight:bold;">${b.title}</div>
+                        <div style="font-size:0.8rem; color:var(--text-sub);">${b.author} | ${b.category}</div>
+                        <div style="font-size:0.9rem; margin-top:5px;">${b.review}</div>
+                        <button class="delete-btn" onclick="deleteBook('${d.id}')">×</button>
+                    </div>
+                `;
+            }).join('');
+        });
+    }
+
+    window.deleteBook = async (id) => {
+        if (confirm('삭제할까요?')) await deleteDoc(doc(db, "books", id));
+    };
+</script>
+
+<script>
+    // 테마 변경 로직 (비로그인 상태에서도 작동하도록 별도 분리)
+    function toggleTheme() {
+        const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', theme);
+        document.getElementById('themeBtn').innerText = theme === 'dark' ? '☀️ 라이트모드' : '🌙 다크모드';
+    }
+</script>
+
+</body>
+</html>
