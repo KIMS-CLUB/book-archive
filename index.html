@@ -11,9 +11,8 @@
             --bg: #F5F5F0; --text: #333; --accent: #FF5A5F; --card: #ffffff;
         }
         body { font-family: 'Noto Serif KR', serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
-        * { box-sizing: border-box; /* 반응형을 위한 박스 모델 통일 */ }
+        * { box-sizing: border-box; }
 
-        /* 헤더 & 네비게이션 */
         .nav { display: flex; justify-content: center; gap: 40px; padding: 30px 0; border-bottom: 1px solid #ddd; font-weight: 600; font-size: 0.9rem; }
         .nav span { cursor: pointer; color: #999; transition: 0.3s; }
         .nav span.active { color: #333; border-bottom: 2px solid #333; }
@@ -24,68 +23,49 @@
         /* 입력 섹션 */
         .input-section { background: var(--card); padding: 40px; border-radius: 2px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); margin-bottom: 80px; }
         .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
-        .search-box input { flex: 1; padding: 15px; border: 1px solid #ddd; font-family: inherit; -webkit-appearance: none; border-radius: 0; }
-        .search-box button { white-space: nowrap; padding: 0 30px; background: #333; color: #fff; border: none; cursor: pointer; font-weight: bold; border-radius: 0; }
+        .search-box input { flex: 1; padding: 15px; border: 1px solid #ddd; font-family: inherit; border-radius: 0; }
+        .search-box button { white-space: nowrap; padding: 0 30px; background: #333; color: #fff; border: none; cursor: pointer; font-weight: bold; }
 
-        .detail-fields input, .detail-fields textarea { width: 100%; padding: 12px; border: 1px solid #eee; background: #f9f9f9; margin-bottom: 10px; font-family: inherit; -webkit-appearance: none; border-radius: 0; }
+        .detail-fields input, .detail-fields textarea { width: 100%; padding: 12px; border: 1px solid #eee; background: #f9f9f9; margin-bottom: 10px; font-family: inherit; border-radius: 0; }
         .save-btn { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; }
 
-        /* 그리드 레이아웃 (반응형 적용) */
-        .book-grid { 
-            display: grid; 
-            /* PC에서는 200px 기준, 모바일에서는 더 작게 자동 조절 */
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
-            gap: 40px; padding-bottom: 100px; 
-        }
+        /* 그리드 레이아웃 */
+        .book-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 40px; padding-bottom: 100px; }
         .book-item { text-align: center; position: relative; cursor: pointer; transition: 0.4s; }
         .book-cover { width: 100%; aspect-ratio: 3/4.5; object-fit: cover; box-shadow: 8px 8px 20px rgba(0,0,0,0.1); border-radius: 2px; margin-bottom: 15px; }
         .book-item:hover { transform: translateY(-5px); }
         .book-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 5px; line-height: 1.3; word-break: keep-all; }
         .book-author { font-size: 0.85rem; color: #888; }
         
-        /* [수정] 삭제 버튼 완벽한 정원형 만들기 */
         .delete-btn { 
-            position: absolute; top: -8px; right: -8px; 
-            background: #333; color: white; 
-            width: 26px; height: 26px; /* 정사각형 크기 지정 */
-            border-radius: 50%; /* 완벽한 원형 */
-            font-size: 16px; line-height: 1;
+            position: absolute; top: -8px; right: -8px; background: #333; color: white; 
+            width: 26px; height: 26px; border-radius: 50%; font-size: 16px; 
             display: flex; align-items: center; justify-content: center; 
-            border: none; cursor: pointer; z-index: 10;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            aspect-ratio: 1 / 1; /* 비율 고정 */
+            border: none; cursor: pointer; z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
-        /* 상세 리뷰 모달 (반응형) */
+        /* 리뷰 수정 모달 */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; padding: 20px; }
-        .modal-content { background: #fff; width: 100%; max-width: 800px; display: flex; gap: 30px; padding: 40px; position: relative; max-height: 90vh; overflow-y: auto; }
+        .modal-content { background: #fff; width: 100%; max-width: 850px; display: flex; gap: 40px; padding: 50px; position: relative; max-height: 90vh; overflow-y: auto; }
         .modal-close { position: absolute; top: 15px; right: 20px; font-size: 2rem; cursor: pointer; z-index: 1; }
-        .modal-img { width: 280px; object-fit: cover; box-shadow: 5px 5px 15px rgba(0,0,0,0.1); align-self: flex-start; }
-        .modal-info { flex: 1; }
-        .modal-info h2 { margin-top: 0; font-size: 1.8rem; line-height: 1.2; }
-        .modal-review { margin-top: 25px; line-height: 1.7; color: #555; border-top: 1px solid #eee; padding-top: 20px; white-space: pre-line; }
+        .modal-img-wrapper { width: 280px; flex-shrink: 0; }
+        .modal-img { width: 100%; box-shadow: 5px 5px 15px rgba(0,0,0,0.1); }
+        .modal-form { flex: 1; }
+        .modal-form h2 { margin-top: 0; font-size: 1.8rem; border-bottom: 2px solid #333; padding-bottom: 10px; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: bold; font-size: 0.85rem; color: #888; margin-bottom: 5px; }
+        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; font-family: inherit; font-size: 0.95rem; }
+        
+        .update-btn { width: 100%; padding: 15px; background: #333; color: white; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; }
 
         .hidden { display: none; }
 
-        /* 📱 모바일 반응형 미디어 쿼리 */
+        /* 모바일 반응형 */
         @media (max-width: 768px) {
-            .site-title { font-size: 2rem; margin: 40px 0; }
-            .nav { gap: 20px; padding: 20px 0; font-size: 0.85rem; }
-            .container { padding: 0 15px; }
-            .input-section { padding: 25px; margin-bottom: 40px; }
-            
-            /* 모바일에서 그리드 간격 및 크기 조정 (2열 유지 노력) */
-            .book-grid { 
-                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
-                gap: 20px; column-gap: 20px;
-            }
-            .book-title { font-size: 0.9rem; }
-            
-            /* 모달 모바일 스타일 */
+            .site-title { font-size: 2.2rem; margin: 40px 0; }
             .modal-content { flex-direction: column; padding: 30px 20px; }
-            .modal-img { width: 160px; margin: 0 auto 20px; align-self: center; }
-            .modal-info h2 { font-size: 1.5rem; text-align: center; }
-            .modal-info p { text-align: center; }
+            .modal-img-wrapper { width: 150px; margin: 0 auto 20px; }
         }
     </style>
 </head>
@@ -101,25 +81,20 @@
 
 <div class="container">
     <div id="loginSection" style="text-align: center; padding: 80px 0;">
-        <p style="margin-bottom: 20px; color: #666;">나만의 영감을 수집하는 공간</p>
-        <button onclick="login()" style="padding: 15px 30px; font-size: 1rem; cursor: pointer; background: #333; color: white; border: none; font-family: inherit;">Google 계정으로 시작</button>
+        <button onclick="login()" style="padding: 15px 30px; background: #333; color: white; border: none; cursor: pointer; font-family: inherit;">Google로 시작하기</button>
     </div>
 
     <div id="appContents" class="hidden">
         <div class="input-section" id="addSection">
             <div class="search-box">
-                <input type="text" id="searchInput" placeholder="검색할 도서 제목을 입력하세요.">
+                <input type="text" id="searchInput" placeholder="아카이브할 책 제목을 검색하세요.">
                 <button onclick="searchKakaoBook()">검색</button>
             </div>
             <div class="detail-fields">
-                <input type="text" id="title" placeholder="제목" readonly style="color:#999;">
-                <input type="text" id="author" placeholder="저자" readonly style="color:#999;">
+                <input type="text" id="title" placeholder="제목" readonly>
+                <input type="text" id="author" placeholder="저자" readonly>
                 <input type="hidden" id="coverUrl">
-                <textarea id="review" rows="4" placeholder="이 책에서 얻은 영감을 기록해주세요."></textarea>
-                <button class="save-btn" onclick="addBook()">Archive 저장</button>
-            </div>
-            <div style="text-align: center; margin-top: 20px;">
-                <button onclick="logout()" style="background:none; border:none; color:#bbb; text-decoration:underline; cursor:pointer; font-size: 0.8rem;">로그아웃</button>
+                <button class="save-btn" onclick="addBook()">내 서재에 등록</button>
             </div>
         </div>
 
@@ -130,11 +105,28 @@
 <div id="bookModal" class="modal" onclick="closeModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
         <span class="modal-close" onclick="closeModal()">×</span>
-        <img id="modalImg" class="modal-img" src="">
-        <div class="modal-info">
-            <h2 id="modalTitle">제목</h2>
-            <p id="modalAuthor" style="color:#888;">저자</p>
-            <div id="modalReview" class="modal-review"></div>
+        <div class="modal-img-wrapper">
+            <img id="modalImg" class="modal-img" src="">
+        </div>
+        <div class="modal-form">
+            <input type="hidden" id="editDocId">
+            <h2 id="modalTitle">책 제목</h2>
+            <p id="modalAuthor" style="color:#888; margin-bottom: 30px;">저자</p>
+            
+            <div class="form-group">
+                <label>읽은 날짜</label>
+                <input type="date" id="editDateRead">
+            </div>
+            <div class="form-group">
+                <label>핵심 기록 (기억하고 싶은 문장 등)</label>
+                <textarea id="editNotes" rows="3" placeholder="기록하고 싶은 내용을 적어주세요."></textarea>
+            </div>
+            <div class="form-group">
+                <label>나의 감상</label>
+                <textarea id="editReview" rows="5" placeholder="이 책을 읽고 어떤 영감을 얻으셨나요?"></textarea>
+            </div>
+            
+            <button class="update-btn" onclick="updateBook()">영감 기록하기</button>
         </div>
     </div>
 </div>
@@ -142,9 +134,8 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, where, onSnapshot, deleteDoc, doc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, where, onSnapshot, deleteDoc, doc, updateDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // 지은님의 Firebase 설정
     const firebaseConfig = {
         apiKey: "AIzaSyBosa3su7U1VkjezE9tAFdymfd3J3Xaqcc",
         authDomain: "book-archive-48b1b.firebaseapp.com",
@@ -174,15 +165,7 @@
     window.login = () => signInWithPopup(auth, provider);
     window.logout = () => signOut(auth);
 
-    window.filterCat = (cat) => {
-        currentCategory = cat;
-        document.querySelectorAll('.nav span').forEach(s => s.classList.remove('active'));
-        document.getElementById(`menu-${cat}`).classList.add('active');
-        document.getElementById('addSection').style.display = (cat === 'Books') ? 'block' : 'none';
-        if(auth.currentUser) loadData(auth.currentUser.uid);
-    };
-
-    // 카카오 검색 (키 적용됨)
+    // 검색 기능
     window.searchKakaoBook = async () => {
         const queryStr = document.getElementById('searchInput').value;
         const KAKAO_KEY = 'f0eb55286c9b77ba1362dd14b32e0643'; 
@@ -197,15 +180,23 @@
         }
     };
 
+    // 데이터 초기 등록 (제목/이미지 위주)
     window.addBook = async () => {
         const title = document.getElementById('title').value;
         if (!title) return alert('검색을 통해 책을 먼저 선택하세요.');
         await addDoc(collection(db, "archive"), {
-            uid: auth.currentUser.uid, category: 'Books', title,
-            author: document.getElementById('author').value, coverUrl: document.getElementById('coverUrl').value,
-            review: document.getElementById('review').value, createdAt: new Date()
+            uid: auth.currentUser.uid,
+            category: 'Books',
+            title,
+            author: document.getElementById('author').value,
+            coverUrl: document.getElementById('coverUrl').value,
+            dateRead: "",
+            notes: "",
+            review: "",
+            createdAt: new Date()
         });
-        ['searchInput', 'title', 'author', 'coverUrl', 'review'].forEach(id => document.getElementById(id).value = '');
+        ['searchInput', 'title', 'author', 'coverUrl'].forEach(id => document.getElementById(id).value = '');
+        alert('서재에 등록되었습니다. 이미지를 눌러 리뷰를 작성해보세요!');
     };
 
     function loadData(uid) {
@@ -214,10 +205,18 @@
             const grid = document.getElementById('bookGrid');
             grid.innerHTML = snapshot.docs.map(d => {
                 const b = d.data();
-                // 리뷰 내용 중 줄바꿈을 <br>로 변환 처리 (모달 전달용)
-                const escapedReview = (b.review || "").replace(/(\r\n|\n|\r)/g, '<br>');
+                // 데이터 전체를 JSON 형태로 모달에 전달
+                const bookData = JSON.stringify({
+                    id: d.id,
+                    title: b.title.replace(/'/g, "\\'"),
+                    author: b.author,
+                    img: b.coverUrl,
+                    dateRead: b.dateRead || "",
+                    notes: (b.notes || "").replace(/\n/g, "\\n"),
+                    review: (b.review || "").replace(/\n/g, "\\n")
+                });
                 return `
-                    <div class="book-item" onclick="openModal('${b.title.replace(/'/g, "\\'")}', '${b.author}', '${b.coverUrl}', \`${escapedReview}\`)">
+                    <div class="book-item" onclick='openEditModal(${bookData})'>
                         <img src="${b.coverUrl}" class="book-cover">
                         <div class="book-title">${b.title}</div>
                         <div class="book-author">${b.author}</div>
@@ -228,22 +227,47 @@
         });
     }
 
-    window.deleteItem = async (id) => { if (confirm('삭제하시겠습니까?')) await deleteDoc(doc(db, "archive", id)); };
-
-    // 모달 기능 (반응형 대응)
-    window.openModal = (title, author, img, reviewBr) => {
-        document.getElementById('modalTitle').innerText = title;
-        document.getElementById('modalAuthor').innerText = author;
-        document.getElementById('modalImg').src = img;
-        // innerHTML을 사용하여 <br> 태그가 줄바꿈으로 적용되도록 함
-        document.getElementById('modalReview').innerHTML = reviewBr || "작성된 내용이 없습니다.";
+    // 모달 열기 (데이터 채우기)
+    window.openEditModal = (book) => {
+        document.getElementById('editDocId').value = book.id;
+        document.getElementById('modalTitle').innerText = book.title;
+        document.getElementById('modalAuthor').innerText = book.author;
+        document.getElementById('modalImg').src = book.img;
+        document.getElementById('editDateRead').value = book.dateRead;
+        document.getElementById('editNotes').value = book.notes;
+        document.getElementById('editReview').value = book.review;
+        
         document.getElementById('bookModal').style.display = 'flex';
-        document.body.style.overflow = 'hidden'; // 모달 떴을 때 배경 스크롤 막기
+        document.body.style.overflow = 'hidden';
     };
 
-    window.closeModal = (e) => {
+    // 리뷰 데이터 업데이트 (수정 저장)
+    window.updateBook = async () => {
+        const docId = document.getElementById('editDocId').value;
+        const docRef = doc(db, "archive", docId);
+        
+        await updateDoc(docRef, {
+            dateRead: document.getElementById('editDateRead').value,
+            notes: document.getElementById('editNotes').value,
+            review: document.getElementById('editReview').value
+        });
+        
+        alert('영감이 성공적으로 기록되었습니다.');
+        closeModal();
+    };
+
+    window.closeModal = () => {
         document.getElementById('bookModal').style.display = 'none';
-        document.body.style.overflow = 'auto'; // 스크롤 다시 허용
+        document.body.style.overflow = 'auto';
+    };
+
+    window.deleteItem = async (id) => { if (confirm('삭제하시겠습니까?')) await deleteDoc(doc(db, "archive", id)); };
+    window.filterCat = (cat) => {
+        currentCategory = cat;
+        document.querySelectorAll('.nav span').forEach(s => s.classList.remove('active'));
+        document.getElementById(`menu-${cat}`).classList.add('active');
+        document.getElementById('addSection').style.display = (cat === 'Books') ? 'block' : 'none';
+        if(auth.currentUser) loadData(auth.currentUser.uid);
     };
     document.getElementById('searchInput')?.addEventListener('keypress', (e) => { if(e.key === 'Enter') searchKakaoBook(); });
 </script>
