@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Things Take Time | My Archive</title>
-    <link rel="manifest" href="manifest.json">
+    <title>Things Take Time | Archive</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&display=swap');
 
@@ -13,62 +12,105 @@
         }
         body { font-family: 'Noto Serif KR', serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; }
         
+        /* 헤더 & 네비게이션 */
         .nav { display: flex; justify-content: center; gap: 40px; padding: 30px 0; border-bottom: 1px solid #ddd; font-weight: 600; font-size: 0.9rem; }
-        .site-title { text-align: center; font-size: 2.8rem; margin: 50px 0; font-weight: 800; letter-spacing: -1px; }
+        .nav span { cursor: pointer; color: #999; transition: 0.3s; }
+        .nav span.active { color: #333; border-bottom: 2px solid #333; }
+        .site-title { text-align: center; font-size: 3rem; margin: 60px 0; font-weight: 800; letter-spacing: -1px; cursor: pointer; }
 
-        .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
 
-        /* 입력 영역 디자인 */
-        .input-section { background: var(--card); padding: 30px; border-radius: 2px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 60px; border: 1px solid #eee; }
-        .search-row { display: flex; gap: 10px; margin-bottom: 15px; }
-        input, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 0; background: #fff; font-family: inherit; box-sizing: border-box; }
-        button { padding: 12px 24px; background: #333; color: #fff; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        button:hover { background: var(--accent); }
-
-        /* 갤러리 그리드 */
-        .book-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 40px; padding-bottom: 100px; }
-        .book-item { text-align: center; position: relative; }
-        .book-cover { width: 100%; aspect-ratio: 3/4.5; object-fit: cover; box-shadow: 5px 15px 25px rgba(0,0,0,0.1); border-radius: 2px; transition: 0.4s; }
-        .book-item:hover .book-cover { transform: translateY(-8px); }
-        .book-title { font-size: 0.95rem; font-weight: 700; margin: 12px 0 4px; line-height: 1.3; }
-        .book-author { font-size: 0.8rem; color: #888; }
+        /* 입력 섹션 */
+        .input-section { background: var(--card); padding: 40px; border-radius: 2px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); margin-bottom: 80px; }
+        .search-box { display: flex; gap: 10px; margin-bottom: 20px; align-items: stretch; }
+        .search-box input { flex: 1; padding: 15px; border: 1px solid #ddd; font-family: inherit; }
         
-        .delete-btn { position: absolute; top: -5px; right: -5px; background: #333; color: white; border-radius: 50%; width: 22px; height: 22px; font-size: 10px; border: none; cursor: pointer; opacity: 0; transition: 0.2s; }
-        .book-item:hover .delete-btn { opacity: 0.7; }
+        /* 검색 버튼 수정: 가로로 길게 */
+        .search-box button { 
+            white-space: nowrap; /* 글자 줄바꿈 방지 */
+            padding: 0 30px; 
+            background: #333; color: #fff; border: none; cursor: pointer; font-weight: bold;
+        }
+
+        .detail-fields input { width: 100%; padding: 12px; border: 1px solid #eee; background: #f9f9f9; margin-bottom: 10px; box-sizing: border-box; font-family: inherit; }
+        .save-btn { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; }
+
+        /* 그리드 레이아웃 */
+        .book-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 50px; padding-bottom: 100px; }
+        .book-item { text-align: center; position: relative; cursor: pointer; transition: 0.4s; }
+        .book-cover { width: 100%; aspect-ratio: 3/4.5; object-fit: cover; box-shadow: 10px 10px 25px rgba(0,0,0,0.1); border-radius: 2px; margin-bottom: 15px; }
+        .book-item:hover { transform: translateY(-10px); }
+        .book-title { font-size: 1rem; font-weight: 700; margin-bottom: 5px; }
+        .book-author { font-size: 0.85rem; color: #888; }
         
+        /* 삭제 버튼 수정: 클릭 가능하도록 z-index 및 이벤트 처리 */
+        .delete-btn { 
+            position: absolute; top: -10px; right: -10px; 
+            background: #333; color: white; border-radius: 50%; 
+            width: 28px; height: 28px; font-size: 14px; 
+            display: flex; align-items: center; justify-content: center; 
+            border: none; cursor: pointer; z-index: 10;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* 상세 리뷰 모달 */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; }
+        .modal-content { background: #fff; width: 90%; max-width: 800px; display: flex; gap: 30px; padding: 40px; position: relative; }
+        .modal-close { position: absolute; top: 20px; right: 20px; font-size: 2rem; cursor: pointer; }
+        .modal-img { width: 300px; box-shadow: 10px 10px 20px rgba(0,0,0,0.1); }
+        .modal-info { flex: 1; }
+        .modal-info h2 { margin-top: 0; font-size: 2rem; }
+        .modal-review { margin-top: 30px; line-height: 1.8; color: #555; border-top: 1px solid #eee; padding-top: 20px; }
+
         .hidden { display: none; }
+        @media (max-width: 700px) { .modal-content { flex-direction: column; align-items: center; overflow-y: auto; height: 90%; } }
     </style>
 </head>
 <body>
 
 <div class="nav">
-    <span>Archive</span>
-    <span style="border-bottom: 2px solid #333;">Books</span>
-    <span>Insights</span>
+    <span onclick="filterCat('Furniture')" id="menu-Furniture">Furniture</span>
+    <span onclick="filterCat('Books')" id="menu-Books" class="active">Books</span>
+    <span onclick="filterCat('Life')" id="menu-Life">Life</span>
 </div>
 
-<div class="site-title">Things Take Time</div>
+<div class="site-title" onclick="location.reload()">Things Take Time</div>
 
 <div class="container">
     <div id="loginSection" style="text-align: center; padding: 100px 0;">
-        <button onclick="login()" style="font-size: 1.1rem;">나의 서재 열기 (Google)</button>
+        <button onclick="login()" style="padding: 15px 40px; font-size: 1.1rem; cursor: pointer;">구글 로그인으로 서재 열기</button>
     </div>
 
     <div id="appContents" class="hidden">
-        <div class="input-section">
-            <div class="search-row">
-                <input type="text" id="searchInput" placeholder="책 제목을 입력하고 엔터를 누르세요.">
-                <button onclick="searchKakaoBook()">Search</button>
+        <div class="input-section" id="addSection">
+            <h3 style="margin-top:0; font-size: 1.5rem;">Add to Archive</h3>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="책 제목을 검색하세요...">
+                <button onclick="searchKakaoBook()">검색</button>
             </div>
-            <input type="text" id="title" placeholder="제목" readonly style="background:#f9f9f9; margin-bottom:10px;">
-            <input type="text" id="author" placeholder="저자" readonly style="background:#f9f9f9; margin-bottom:10px;">
-            <input type="hidden" id="coverUrl">
-            <textarea id="review" rows="2" placeholder="이 책에 대한 한 줄 평을 남겨주세요."></textarea>
-            <button onclick="addBook()" style="width:100%; margin-top:15px; background:var(--accent);">서재에 담기</button>
-            <button onclick="logout()" style="background:none; color:#bbb; font-size:0.75rem; margin-top:15px; text-decoration:underline;">Logout</button>
+            <div class="detail-fields">
+                <input type="text" id="title" placeholder="제목 (검색 시 자동 입력)" readonly>
+                <input type="text" id="author" placeholder="저자 (검색 시 자동 입력)" readonly>
+                <input type="hidden" id="coverUrl">
+                <textarea id="review" rows="4" placeholder="이 책에 대한 깊은 생각을 기록해보세요." style="width:100%; padding:15px; font-family:inherit; border:1px solid #eee; box-sizing:border-box;"></textarea>
+                <button class="save-btn" onclick="addBook()">기록 저장하기</button>
+            </div>
+            <button onclick="logout()" style="background:none; border:none; color:#bbb; text-decoration:underline; cursor:pointer; margin-top:20px;">로그아웃</button>
         </div>
 
         <div class="book-grid" id="bookGrid"></div>
+    </div>
+</div>
+
+<div id="bookModal" class="modal" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="modal-close" onclick="closeModal()">×</span>
+        <img id="modalImg" class="modal-img" src="">
+        <div class="modal-info">
+            <h2 id="modalTitle">제목</h2>
+            <p id="modalAuthor" style="color:#888;">저자</p>
+            <div id="modalReview" class="modal-review">리뷰 내용이 여기에 표시됩니다.</div>
+        </div>
     </div>
 </div>
 
@@ -77,6 +119,7 @@
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, collection, addDoc, query, where, onSnapshot, deleteDoc, doc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+    // 지은님의 Firebase 설정
     const firebaseConfig = {
         apiKey: "AIzaSyBosa3su7U1VkjezE9tAFdymfd3J3Xaqcc",
         authDomain: "book-archive-48b1b.firebaseapp.com",
@@ -91,11 +134,13 @@
     const db = getFirestore(app);
     const provider = new GoogleAuthProvider();
 
+    let currentCategory = 'Books';
+
     onAuthStateChanged(auth, (user) => {
         if (user) {
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('appContents').classList.remove('hidden');
-            loadBooks(user.uid);
+            loadData(user.uid);
         } else {
             document.getElementById('loginSection').classList.remove('hidden');
             document.getElementById('appContents').classList.add('hidden');
@@ -105,10 +150,22 @@
     window.login = () => signInWithPopup(auth, provider);
     window.logout = () => signOut(auth);
 
-    // 카카오 도서 검색 기능 (지은님이 발급받은 키 적용)
+    // 메뉴 필터링 기능
+    window.filterCat = (cat) => {
+        currentCategory = cat;
+        document.querySelectorAll('.nav span').forEach(s => s.classList.remove('active'));
+        document.getElementById(`menu-${cat}`).classList.add('active');
+        
+        // Books가 아닐 때는 검색창 숨기기 (또는 카테고리에 맞는 안내 표시)
+        document.getElementById('addSection').style.display = (cat === 'Books') ? 'block' : 'none';
+        
+        if(auth.currentUser) loadData(auth.currentUser.uid);
+    };
+
+    // 카카오 도서 검색
     window.searchKakaoBook = async () => {
         const queryStr = document.getElementById('searchInput').value;
-        const KAKAO_KEY = 'f0eb55286c9b77ba1362dd14b32e0643';
+        const KAKAO_KEY = 'f0eb55286c9b77ba1362dd14b32e0643'; // 지은님의 키
         
         if(!queryStr) return;
 
@@ -127,41 +184,62 @@
 
     window.addBook = async () => {
         const title = document.getElementById('title').value;
-        const coverUrl = document.getElementById('coverUrl').value;
-        if (!title) return alert('책을 먼저 검색해주세요!');
+        if (!title) return alert('검색을 통해 책을 먼저 선택하세요.');
 
-        await addDoc(collection(db, "books"), {
+        await addDoc(collection(db, "archive"), {
             uid: auth.currentUser.uid,
+            category: 'Books',
             title,
             author: document.getElementById('author').value,
-            coverUrl: coverUrl || 'https://via.placeholder.com/150x220?text=No+Cover',
+            coverUrl: document.getElementById('coverUrl').value,
             review: document.getElementById('review').value,
             createdAt: new Date()
         });
+        
         ['searchInput', 'title', 'author', 'coverUrl', 'review'].forEach(id => document.getElementById(id).value = '');
     };
 
-    function loadBooks(uid) {
-        const q = query(collection(db, "books"), where("uid", "==", uid), orderBy("createdAt", "desc"));
+    function loadData(uid) {
+        const q = query(collection(db, "archive"), where("uid", "==", uid), where("category", "==", currentCategory), orderBy("createdAt", "desc"));
         onSnapshot(q, (snapshot) => {
             const grid = document.getElementById('bookGrid');
             grid.innerHTML = snapshot.docs.map(d => {
                 const b = d.data();
                 return `
-                    <div class="book-item">
+                    <div class="book-item" onclick="openModal('${b.title}', '${b.author}', '${b.coverUrl}', \`${b.review}\`)">
                         <img src="${b.coverUrl}" class="book-cover">
                         <div class="book-title">${b.title}</div>
                         <div class="book-author">${b.author}</div>
-                        <button class="delete-btn" onclick="deleteBook('${d.id}')">✕</button>
+                        <button class="delete-btn" onclick="event.stopPropagation(); deleteItem('${d.id}')">✕</button>
                     </div>
                 `;
             }).join('');
         });
     }
 
-    window.deleteBook = async (id) => {
-        if (confirm('이 기록을 삭제하시겠어요?')) await deleteDoc(doc(db, "books", id));
+    window.deleteItem = async (id) => {
+        if (confirm('이 기록을 영구적으로 삭제할까요?')) {
+            await deleteDoc(doc(db, "archive", id));
+        }
     };
+
+    // 모달 관련 기능
+    window.openModal = (title, author, img, review) => {
+        document.getElementById('modalTitle').innerText = title;
+        document.getElementById('modalAuthor').innerText = author;
+        document.getElementById('modalImg').src = img;
+        document.getElementById('modalReview').innerText = review || "작성된 리뷰가 없습니다.";
+        document.getElementById('bookModal').style.display = 'flex';
+    };
+
+    window.closeModal = (e) => {
+        document.getElementById('bookModal').style.display = 'none';
+    };
+
+    // 엔터키 검색 지원
+    document.getElementById('searchInput')?.addEventListener('keypress', (e) => {
+        if(e.key === 'Enter') searchKakaoBook();
+    });
 </script>
 </body>
 </html>
